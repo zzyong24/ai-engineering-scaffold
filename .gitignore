@@ -1,0 +1,23 @@
+# 脚手架自身的 .gitignore
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db
+
+# AIES 运行时产物（脚手架自身不应有）
+.aies/.developer
+.aies/workspace/*/journal-*.md
+.aies/tasks/*/
+!.aies/tasks/.gitkeep

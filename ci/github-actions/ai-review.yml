@@ -1,0 +1,66 @@
+name: AI Review Gate
+
+# 在 PR 上跑 AIES 规范检查
+# 本文件为模板，各项目按需修改
+
+on:
+  pull_request:
+    branches: [main, master, develop]
+
+jobs:
+  aies-gate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # 获取完整历史以便 diff
+
+      # 检查 1：AI 生成的代码必须标注 [ai-assisted]
+      - name: Check AI-assisted commits
+        run: |
+          echo "检查本 PR 的 commit 是否标注 [ai-assisted]..."
+          AI_COMMITS=$(git log --format=%s origin/${{ github.base_ref }}..HEAD | grep -c "ai-assisted" || true)
+          TOTAL=$(git log --format=%s origin/${{ github.base_ref }}..HEAD | wc -l)
+          echo "AI-assisted commits: $AI_COMMITS / $TOTAL"
+
+      # 检查 2：如果代码文件有变更，.ai/index.md 或 .ai/changelog.md 也应该有变更
+      - name: Check index/changelog updated
+        run: |
+          CODE_CHANGED=$(git diff --name-only origin/${{ github.base_ref }}..HEAD -- '*.go' '*.ts' '*.py' '*.java' '*.rs' | wc -l)
+          INDEX_CHANGED=$(git diff --name-only origin/${{ github.base_ref }}..HEAD -- '.ai/index.md' '.ai/changelog.md' | wc -l)
+          if [ "$CODE_CHANGED" -gt 0 ] && [ "$INDEX_CHANGED" -eq 0 ]; then
+            echo "::warning ::代码有变更但 .ai/index.md 和 .ai/changelog.md 未更新"
+          fi
+
+      # 检查 3：验证 Spec 文件中没有 TODO 占位符残留
+      - name: Check spec TODOs
+        run: |
+          TODO_COUNT=$(grep -rn "TODO:" .aies/spec/ 2>/dev/null | wc -l || echo 0)
+          echo "Spec 中 TODO 数量: $TODO_COUNT"
+          if [ "$TODO_COUNT" -gt 20 ]; then
+            echo "::warning ::Spec 中有 $TODO_COUNT 个 TODO，请补齐项目特有规范"
+          fi
+
+      # 检查 4：必须存在核心文件
+      - name: Check core files exist
+        run: |
+          for f in .ai/index.md .ai/review-checklist.md .aies/workflow.md .aies/spec/index.md; do
+            if [ ! -f "$f" ]; then
+              echo "::error ::缺少核心文件: $f"
+              exit 1
+            fi
+          done
+
+  # 可选：调用 LLM 对变更做 AI Review
+  # llm-review:
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #     - name: Run AI Review via Claude / GPT
+  #       env:
+  #         ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+  #       run: |
+  #         # 将 git diff 喂给 LLM，附带 .ai/review-checklist.md
+  #         # 输出不通过项作为 PR 评论
+  #         ./ci/scripts/llm-review.sh
