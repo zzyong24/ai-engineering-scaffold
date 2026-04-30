@@ -63,7 +63,7 @@ python3 /path/to/ai-engineering-scaffold/bootstrap.py --mode=merge \
 # - 生成平台入口文件（CLAUDE.md 等）
 ```
 
-### 场景 C：深度迁移（agent-manage-backend 式）
+### 场景 C：深度迁移（已有多 Agent 体系式）
 
 **适用**：从 Trellis / 多 Agent 体系迁移，统一目录布局。
 
@@ -296,7 +296,7 @@ echo ".aies/.developer" >> .gitignore
 | 项目规模 | 预计耗时 |
 |---------|---------|
 | 小型（<10 个 Spec 文件） | 2-4 小时 |
-| 中型（如 agent-manage-backend） | 1-2 天 |
+| 中型（约 40+ 个 Spec/源文件） | 1-2 天 |
 | 大型（多个子模块，monorepo） | 3-5 天 |
 
 ---

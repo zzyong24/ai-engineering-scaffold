@@ -29,7 +29,7 @@
 [research][plan][impl][check][debug][create-pr]
 ```
 
-**典型实现**：agent-manage-backend 中的 Trellis dispatch 模式
+**典型实现**：Go 管理后端服务中的 dispatch 模式（详见 `docs/agent-manage-backend-review.md`）
 
 ### 形态 3：并行 + 协作（Parallel Team）
 

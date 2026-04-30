@@ -79,7 +79,9 @@ ai-engineering-scaffold/
 │   ├── philosophy.md             ← 全 AI 开发环境构建哲学（必读）
 │   ├── multi-agent-decision.md   ← 什么时候需要多 Agent（避免过度设计）
 │   ├── migration-guide.md        ← 从现有工程迁移指南
-│   └── agent-manage-backend-review.md  ← 以 agent-manage-backend 为例的得失复盘
+│   ├── agent-manage-backend-review.md  ← 以 agent-manage-backend 为例的得失复盘
+│   ├── case-study-agent-crontask.md    ← 战例：1 次会话从零实现 MCP Server
+│   └── global-hooks-design.md         ← 全局 Hook 设计指南（个人工具 vs 工程工具）
 │
 ├── .ai/                          ← 📋 AI 协作工作区（项目级、可提交）
 │   ├── index.md                  ← 项目地图（架构/路由/模型/调用链）
@@ -172,6 +174,8 @@ ai-engineering-scaffold/
 2. `docs/multi-agent-decision.md` —— 判断你的项目需不需要多 Agent
 3. `docs/migration-guide.md` —— 将现有工程迁移到 AIES 的步骤
 4. `docs/agent-manage-backend-review.md` —— 复盘一个真实案例的得失
+5. `docs/case-study-agent-crontask.md` —— **真实战例**：1 次会话从零实现 MCP Server，20 个 P0 场景全通过，人工介入 3 次
+6. `docs/global-hooks-design.md` —— 如何用全局 Hook 自动记录重大产出（个人工具 vs 工程工具的边界）
 
 ---
 

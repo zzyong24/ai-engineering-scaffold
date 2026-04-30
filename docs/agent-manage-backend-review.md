@@ -1,6 +1,6 @@
 # 案例复盘：agent-manage-backend 的全 AI 开发实践
 
-> 本文基于对 `/Users/zyongzhu/workbase/agent/agent-manage-backend` 工程的深入分析，评估其 AI 工程化建设的成熟度、亮点、不足，并给出迁移到 AIES 脚手架的建议。
+> 本文基于对某 Go + Gin 智能体管理后端工程的深入分析，评估其 AI 工程化建设的成熟度、亮点、不足，并给出迁移到 AIES 脚手架的建议。
 
 ---
 
@@ -297,7 +297,7 @@ hooks:
 ---
 version: 1.3.0
 updated: 2026-04-24
-owner: zyongzhu
+owner: {your-name}
 ---
 ```
 
