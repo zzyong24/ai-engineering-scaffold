@@ -21,3 +21,4 @@ Thumbs.db
 .aies/workspace/*/journal-*.md
 .aies/tasks/*/
 !.aies/tasks/.gitkeep
+.aies/tasks/archive/

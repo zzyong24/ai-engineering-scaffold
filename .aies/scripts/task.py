@@ -30,6 +30,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 import shutil
 import sys
 from pathlib import Path
@@ -46,7 +47,6 @@ from lib.common import (  # noqa: E402
 
 
 def _slugify(text: str) -> str:
-    import re
     s = re.sub(r"[^\w\-]+", "-", text.strip().lower())
     s = re.sub(r"-+", "-", s).strip("-")
     return s or "task"
@@ -229,7 +229,6 @@ def cmd_checkpoint(args: argparse.Namespace) -> int:
 """
     # 替换或追加
     if "## 当前状态" in existing:
-        import re
         existing = re.sub(
             r"## 当前状态\n[\s\S]*?(?=\n## |\Z)",
             new_current,
@@ -239,14 +238,19 @@ def cmd_checkpoint(args: argparse.Namespace) -> int:
         existing = new_current + "\n" + existing
 
     if "## 执行历史" in existing:
-        existing = existing.replace(
+        replaced = existing.replace(
             "## 执行历史\n\n（空）",
-            f"## 执行历史\n{history_entry}"
+            f"## 执行历史\n{history_entry}",
         )
-        if "（空）" not in existing:
+        if replaced != existing:
+            # 初始"（空）"占位已被替换，使用替换结果
+            existing = replaced
+        else:
+            # 已有历史条目，在 section 头部追加新条目
             existing = existing.replace(
                 "## 执行历史\n",
-                f"## 执行历史\n{history_entry}"
+                f"## 执行历史\n{history_entry}",
+                1,
             )
     else:
         existing += f"\n## 执行历史\n{history_entry}"
@@ -276,7 +280,6 @@ def cmd_block(args: argparse.Namespace) -> int:
     existing = checkpoint.read_text(encoding="utf-8") if checkpoint.exists() else ""
     block_entry = f"\n### {now_iso()} — 🚫 BLOCKED\n\n**原因**: {args.reason}\n\n**需要人介入**: 是\n"
 
-    import re
     new_current = f"""## 当前状态
 
 - **阶段**：BLOCKED
@@ -290,11 +293,20 @@ def cmd_block(args: argparse.Namespace) -> int:
         existing = new_current + existing
 
     if "## 阻塞记录" in existing:
-        existing = existing.replace(
+        replaced = existing.replace(
             "## 阻塞记录\n\n（无）",
-            f"## 阻塞记录\n{block_entry}"
+            f"## 阻塞记录\n{block_entry}",
         )
-        existing += block_entry
+        if replaced == existing:
+            # "（无）" 已被前次替换过，直接追加到阻塞记录 section
+            existing = re.sub(
+                r"(## 阻塞记录\n)",
+                rf"\g<1>{block_entry}",
+                existing,
+                count=1,
+            )
+        else:
+            existing = replaced
     else:
         existing += f"\n## 阻塞记录\n{block_entry}"
 
@@ -322,7 +334,6 @@ def cmd_unblock(args: argparse.Namespace) -> int:
     # 更新 checkpoint 当前状态
     checkpoint = task_dir / "checkpoint.md"
     if checkpoint.exists():
-        import re
         existing = checkpoint.read_text(encoding="utf-8")
         new_current = f"""## 当前状态
 
@@ -365,7 +376,7 @@ def _print_status(task_dir: Path, data: dict) -> None:
         print("\n（无 checkpoint，任务未启动）")
 
 
-def cmd_list(_args: argparse.Namespace) -> int:
+def cmd_list(args: argparse.Namespace) -> int:
     aies = get_aies_dir()
     tasks_dir = aies / "tasks"
     if not tasks_dir.is_dir():
@@ -391,7 +402,6 @@ def cmd_list(_args: argparse.Namespace) -> int:
         checkpoint = p / "checkpoint.md"
         next_step = ""
         if checkpoint.exists():
-            import re
             m = re.search(r"\*\*下一步\*\*[：:]\s*(.+)", checkpoint.read_text(encoding="utf-8"))
             if m:
                 next_step = f" → {m.group(1)[:40]}"
@@ -455,7 +465,6 @@ def cmd_finish(args: argparse.Namespace) -> int:
     # 更新 checkpoint 为已完成
     checkpoint = task_dir / "checkpoint.md"
     if checkpoint.exists():
-        import re
         existing = checkpoint.read_text(encoding="utf-8")
         new_current = f"## 当前状态\n\n- **阶段**：✅ COMPLETED\n- **最后更新**：{now_iso()}\n"
         existing = re.sub(r"## 当前状态\n[\s\S]*?(?=\n## |\Z)", new_current, existing)
@@ -503,7 +512,8 @@ def main() -> int:
     create_p.add_argument("--description", default="", help="简短描述（--confirmed 时用于填充 prd）")
 
     # list
-    sub.add_parser("list", help="列出活跃任务")
+    list_p = sub.add_parser("list", help="列出活跃任务")
+    list_p.add_argument("--human", action="store_true", help="输出可读格式（默认已是可读格式，保留此 flag 做兼容）")
     sub.add_parser("list-archive", help="列出已归档任务")
 
     # start
