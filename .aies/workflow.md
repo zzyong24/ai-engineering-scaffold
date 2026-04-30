@@ -71,10 +71,14 @@ AI 收到任务后**第一段输出**必须是：
    - [ ] 日志规范
    - [ ] AI 常见盲区
    - [ ] 编译/类型检查通过
-2. 索引更新：[已更新 .ai/index.md / 无需更新]
-3. 建议 commit message：`type(scope): 描述 [ai-assisted]`
-4. 会话日志建议：`python3 .aies/scripts/session.py add --title "..." --summary "..."`
-5. Spec 缺口沉淀：[是否发现新约定需要沉淀到 .aies/spec/]
+2. 测试验收（参照 acceptance.md）：
+   - [ ] 单元测试全部通过（pytest tests/unit/ -v）
+   - [ ] E2E Happy Path 通过
+   - [ ] acceptance.md 中所有 P0 验收场景打勾
+3. 索引更新：[已更新 .ai/index.md / 无需更新]
+4. 建议 commit message：`type(scope): 描述 [ai-assisted]`
+5. 会话日志建议：`python3 .aies/scripts/session.py add --title "..." --summary "..."`
+6. Spec 缺口沉淀：[是否发现新约定需要沉淀到 .aies/spec/]
 ```
 
 ### Phase 4：会话结束（手动触发）
@@ -100,8 +104,13 @@ python3 .aies/scripts/task.py create "任务标题" --slug task-slug
 会在 `.aies/tasks/` 下生成：
 ```
 .aies/tasks/{MM-DD-slug}/
-└── task.json
+├── task.json
+├── prd.md          ← 需求描述（需手动填写）
+└── acceptance.md   ← 验收与测试骨架（需手动填写，implement 前必须完成）
 ```
+
+**⚠️ 强制**：`acceptance.md` 必须在 implement 阶段开始前填写完毕。
+没有 `acceptance.md` 的任务，implement agent 不得启动。
 
 ### 查看任务
 

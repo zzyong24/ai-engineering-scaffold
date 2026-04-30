@@ -23,6 +23,7 @@
 | [architecture.md](./architecture.md) | 架构约束、分层职责 | **每次写代码前** |
 | [code-style.md](./code-style.md) | 命名、注释、格式 | **每次写代码前** |
 | [quality-gates.md](./quality-gates.md) | 禁止模式、必须模式、自检清单 | **每次写代码前** |
+| [testing.md](./testing.md) | 单元测试、E2E、acceptance.md 规范 | **每次新增任务时、implement 前** |
 | [error-handling.md](./error-handling.md) | 错误处理、错误码规范 | 涉及错误处理时 |
 | [logging.md](./logging.md) | 日志级别、格式、敏感字段 | 涉及日志时 |
 
@@ -36,6 +37,7 @@ cat .aies/spec/index.md              # 本文件
 cat .aies/spec/architecture.md       # 架构约束
 cat .aies/spec/code-style.md         # 代码风格
 cat .aies/spec/quality-gates.md      # 质量门
+cat .aies/spec/testing.md            # 测试规范（新增任务时必读）
 
 # 按任务类型额外读取：
 # 涉及错误处理 → error-handling.md
@@ -70,9 +72,13 @@ cat .aies/spec/quality-gates.md      # 质量门
    - [ ] 安全检查（参数化、输入校验、无硬编码）
    - [ ] 日志规范（关键操作有日志、无敏感字段）
    - [ ] 编译/类型检查通过
-2. 索引更新：[已更新 .ai/index.md / 无需更新]
-3. 建议 commit message：`type(scope): 描述 [ai-assisted]`
-4. 是否有新约定需沉淀到 Spec：[有/无]
+2. 测试验收（参照 acceptance.md）：
+   - [ ] 单元测试全部通过（pytest tests/unit/ -v）
+   - [ ] E2E Happy Path 通过
+   - [ ] acceptance.md 中所有 P0 验收场景打勾
+3. 索引更新：[已更新 .ai/index.md / 无需更新]
+4. 建议 commit message：`type(scope): 描述 [ai-assisted]`
+5. 是否有新约定需沉淀到 Spec：[有/无]
 ```
 
 ---
