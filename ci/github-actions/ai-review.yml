@@ -53,14 +53,14 @@ jobs:
           done
 
   # 可选：调用 LLM 对变更做 AI Review
-  # llm-review:
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - uses: actions/checkout@v4
-  #     - name: Run AI Review via Claude / GPT
-  #       env:
-  #         ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-  #       run: |
-  #         # 将 git diff 喂给 LLM，附带 .ai/review-checklist.md
-  #         # 输出不通过项作为 PR 评论
-  #         ./ci/scripts/llm-review.sh
+  llm-review:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run AI Review via Claude / GPT
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          # 将 git diff 喂给 LLM，附带 .ai/review-checklist.md
+          # 输出不通过项作为 PR 评论
+          ./ci/scripts/llm-review.sh

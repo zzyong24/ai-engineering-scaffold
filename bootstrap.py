@@ -14,21 +14,28 @@ AIES 脚手架一键初始化脚本
     # 最简（当前目录，所有平台，合并模式）
     python3 bootstrap.py --here --developer your-name
 
+    # 升级已有项目（diff 出模板变化，引导合并）
+    python3 bootstrap.py --upgrade --target /path/to/project
+
 模式：
     fresh   —— 全新项目，直接拷贝
     merge   —— 已有项目，保留已有文件
     add     —— 只添加缺失的文件，不覆盖任何已有文件
+    upgrade —— 对比模板哈希，报告变更，引导合并
 """
 
 from __future__ import annotations
 
 import argparse
+import hashlib
+import json
 import shutil
 import sys
 from datetime import datetime
 from pathlib import Path
 
 SCAFFOLD_DIR = Path(__file__).parent.resolve()
+TEMPLATE_HASHES_FILE = ".aies/.template-hashes.json"
 
 # ============================================================
 # 模板常量
@@ -106,6 +113,9 @@ def copy_tree(src: Path, dst: Path, mode: str, dry_run: bool) -> list[str]:
     for item in src.rglob("*"):
         if item.is_dir():
             continue
+        # 跳过 __pycache__ 和 .pyc 文件
+        if "__pycache__" in item.parts or item.suffix == ".pyc":
+            continue
         rel = item.relative_to(src)
         target = dst / rel
         actions.append(copy_file(item, target, mode, dry_run))
@@ -148,6 +158,7 @@ def write_gitignore_lines(target: Path, dry_run: bool) -> str:
     gi_path = target / ".gitignore"
     required = [
         ".aies/.developer",
+        ".aies/.template-hashes.json",
     ]
 
     existing = gi_path.read_text(encoding="utf-8") if gi_path.is_file() else ""
@@ -165,6 +176,129 @@ def write_gitignore_lines(target: Path, dry_run: bool) -> str:
         for line in missing:
             f.write(line + "\n")
     return f"  .gitignore 已追加: {', '.join(missing)}"
+
+
+# ============================================================
+# 模板哈希追踪
+# ============================================================
+
+def _file_md5(path: Path) -> str:
+    """计算文件 MD5"""
+    return hashlib.md5(path.read_bytes()).hexdigest()
+
+
+def _collect_template_hashes() -> dict[str, str]:
+    """收集 scaffold 所有模板文件的哈希"""
+    hashes: dict[str, str] = {}
+    for src_dir in [SCAFFOLD_DIR / ".ai", SCAFFOLD_DIR / ".aies"]:
+        if not src_dir.is_dir():
+            continue
+        for f in src_dir.rglob("*"):
+            if f.is_file():
+                rel = str(f.relative_to(SCAFFOLD_DIR))
+                hashes[rel] = _file_md5(f)
+    for plat_cfg in PLATFORM_MAP.values():
+        src = SCAFFOLD_DIR / plat_cfg["source"]
+        for src_rel, _ in plat_cfg["targets"]:
+            p = src / src_rel.rstrip("/")
+            if p.is_file():
+                rel = str(p.relative_to(SCAFFOLD_DIR))
+                hashes[rel] = _file_md5(p)
+            elif p.is_dir():
+                for f in p.rglob("*"):
+                    if f.is_file():
+                        rel = str(f.relative_to(SCAFFOLD_DIR))
+                        hashes[rel] = _file_md5(f)
+    return hashes
+
+
+def write_template_hashes(target: Path, dry_run: bool) -> str:
+    """写入 .aies/.template-hashes.json"""
+    hashes_path = target / TEMPLATE_HASHES_FILE
+    hashes = _collect_template_hashes()
+    meta = {
+        "scaffold_version": datetime.now().strftime("%Y%m%d"),
+        "generated_at": datetime.now().isoformat(),
+        "files": hashes,
+    }
+    if not dry_run:
+        hashes_path.parent.mkdir(parents=True, exist_ok=True)
+        hashes_path.write_text(json.dumps(meta, indent=2, ensure_ascii=False), encoding="utf-8")
+    return f"  WRITE  {TEMPLATE_HASHES_FILE}  ({len(hashes)} 个模板文件)"
+
+
+def cmd_upgrade(target: Path, dry_run: bool) -> int:
+    """升级模式：diff 出模板变化，引导合并"""
+    hashes_path = target / TEMPLATE_HASHES_FILE
+    if not hashes_path.is_file():
+        print(f"❌ 未找到 {TEMPLATE_HASHES_FILE}，请先执行初始化（bootstrap.py --here）")
+        return 1
+
+    saved = json.loads(hashes_path.read_text(encoding="utf-8"))
+    old_hashes: dict[str, str] = saved.get("files", {})
+    old_version = saved.get("scaffold_version", "unknown")
+    new_hashes = _collect_template_hashes()
+    new_version = datetime.now().strftime("%Y%m%d")
+
+    # diff
+    added = [k for k in new_hashes if k not in old_hashes]
+    removed = [k for k in old_hashes if k not in new_hashes]
+    changed = [k for k in new_hashes if k in old_hashes and new_hashes[k] != old_hashes[k]]
+
+    print(f"\n🔍 AIES 模板升级检查")
+    print(f"   已安装版本: {old_version}")
+    print(f"   当前版本:   {new_version}")
+    print()
+
+    if not added and not removed and not changed:
+        print("✅ 模板无变化，项目已是最新版本。")
+        return 0
+
+    if added:
+        print(f"📥 新增文件（{len(added)}）—— 可直接复制到项目：")
+        for f in added:
+            print(f"   + {f}")
+        print()
+
+    if changed:
+        print(f"📝 模板已更新（{len(changed)}）—— 需要手动合并：")
+        for f in changed:
+            # 计算项目中对应目标文件的路径
+            dst = _template_rel_to_target(f, target)
+            project_modified = dst.is_file() and _file_md5(dst) != old_hashes.get(f, "")
+            status = "⚠️  项目文件已被本地修改，需仔细合并" if project_modified else "✅ 项目文件未修改，可直接覆盖"
+            print(f"   ~ {f}")
+            print(f"       {status}")
+        print()
+
+    if removed:
+        print(f"🗑️  已废弃文件（{len(removed)}）—— 建议检查并删除：")
+        for f in removed:
+            print(f"   - {f}")
+        print()
+
+    if not dry_run and (added or changed):
+        answer = input("是否更新 .template-hashes.json 为新版本哈希？[y/N]: ").strip().lower()
+        if answer == "y":
+            meta = {
+                "scaffold_version": new_version,
+                "generated_at": datetime.now().isoformat(),
+                "files": new_hashes,
+            }
+            hashes_path.write_text(json.dumps(meta, indent=2, ensure_ascii=False), encoding="utf-8")
+            print("✅ 已更新 .template-hashes.json")
+
+    print()
+    print("手动合并步骤：")
+    print("  1. 对照上面的变更列表，逐文件 diff scaffold/ 和项目中的文件")
+    print("  2. 手动将模板新增内容合并进项目文件（保留你的自定义部分）")
+    print("  3. 合并完成后再次运行 --upgrade 确认无变化")
+    return 0
+
+
+def _template_rel_to_target(template_rel: str, target: Path) -> Path:
+    """将模板相对路径转换为项目目标路径（近似，不含平台映射）"""
+    return target / template_rel
 
 
 def post_process_placeholders(target: Path, project_name: str, dry_run: bool) -> list[str]:
@@ -262,12 +396,23 @@ def parse_args() -> argparse.Namespace:
         "--mode", choices=["fresh", "merge", "add"], default="merge",
         help="安装模式（默认 merge）",
     )
+    p.add_argument("--upgrade", action="store_true", help="升级模式：检查模板变化并引导合并")
     p.add_argument("--dry-run", action="store_true", help="仅打印动作，不实际修改")
     return p.parse_args()
 
 
 def main() -> int:
     args = parse_args()
+
+    # ── 升级模式 ──────────────────────────────────────────────
+    if args.upgrade:
+        target = args.target
+        if args.here or target is None:
+            target = Path.cwd().resolve()
+        if not target.is_dir():
+            print(f"❌ 目标目录不存在: {target}", file=sys.stderr)
+            return 1
+        return cmd_upgrade(target, args.dry_run)
 
     if args.interactive:
         cfg = interactive_config()
@@ -335,7 +480,11 @@ def main() -> int:
     all_actions.append("\n✏️ 替换占位符")
     all_actions.extend(post_process_placeholders(target, cfg["project_name"], dry_run))
 
-    # Step 5: 初始化开发者身份
+    # Step 5: 写入模板哈希（用于后续 --upgrade diff）
+    all_actions.append("\n🔒 记录模板哈希（用于 --upgrade）")
+    all_actions.append(write_template_hashes(target, dry_run))
+
+    # Step 6: 初始化开发者身份
     if cfg["developer"] and not dry_run:
         import subprocess
         script = target / ".aies" / "scripts" / "init-developer.py"
@@ -368,6 +517,9 @@ def main() -> int:
         print("  3. 编辑 .ai/index.md 填写项目地图")
         print("  4. 编辑 .aies/spec/architecture.md 填写架构约束")
         print("  5. 运行 python3 .aies/scripts/session.py get-context 测试")
+        print()
+        print("升级模板时：")
+        print("  python3 bootstrap.py --upgrade --target <项目目录>")
     print("=" * 60)
 
     return 0

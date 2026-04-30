@@ -1,84 +1,106 @@
-# {{PROJECT_NAME}} — Claude Code 规范入口
+# {{PROJECT_NAME}} — AIES Agent 操作系统
 
-> 本文件是 Claude Code 在本项目中的强制规范入口。所有代码生成行为必须先加载下述文件。
-
----
-
-## 必读文件（每次会话开始）
-
-Claude Code 的 SessionStart Hook 会自动注入以下文件，无需手动读取：
-
-1. `.aies/workflow.md` —— 工作流（Phase 1/2/3 协议）
-2. `.aies/spec/index.md` —— 规范导航
-3. `.ai/index.md` —— 项目地图
-4. `.ai/review-checklist.md` —— 审查清单
-
-如未启用 Hook，请 AI 在对话开始时**主动读取**上述文件。
+> **定位**：这不是一套编码规范，是一个 Agent 操作系统。
+> `.aies/` + `.ai/` 是 Agent 的上下文体系和跨会话记忆，人只提供意图和拍板，Agent 驱动一切。
 
 ---
 
-## 每次任务的强制协议
+## Agent 的工作模式
 
-### Phase 1：启动清单（写代码前第一段输出）
-
-```
-📋 任务启动清单
-━━━━━━━━━━━━━━
-• 任务类型：[新增 / 修改 / 修复 / 重构 / 其他]
-• 需读取的参考文件：[按 .ai/context-guide.md 列出]
-• 涉及的规范要点：[从 .aies/spec/ 列出]
-• 预计变更文件：[列出]
-• 索引需更新：[是 / 否]
-```
-
-### Phase 2：执行
-
-按清单读取参考文件 → 生成代码。
-
-### Phase 3：完成清单（写完代码后必须输出）
+**不要等人告诉你怎么做。根据人说的话，自己判断该做什么。**
 
 ```
-✅ 任务完成清单
-━━━━━━━━━━━━━━
-1. 质量自检（参照 .ai/review-checklist.md）
-2. 索引更新：[.ai/index.md 已更新 / 无需]
-3. 建议 commit message：`type(scope): 描述 [ai-assisted]`
-4. 会话日志：python3 .aies/scripts/session.py add --title "..." --summary "..."
-5. Spec 缺口：[有/无新约定需沉淀]
+人说的话
+  │
+  ├─ 这是一个新需求/功能/修复
+  │   └─ → 执行 /aies:task 流程（意图解析 → 提议 prd+acceptance → 确认 → 实现）
+  │
+  ├─ 继续/上次/那个任务
+  │   └─ → 执行 /aies:start 流程（读 journal 接续上下文）
+  │
+  ├─ 项目刚创建 / .aies 不存在
+  │   └─ → 执行 /aies:bootstrap 流程（引导初始化）
+  │
+  ├─ 做完了 / 提交 / 收尾
+  │   └─ → 执行 /aies:finish 流程（Phase 3 + Spec 回流 + 日志）
+  │
+  └─ 其他（问问题、聊方案、debug）
+      └─ → 先读 .ai/index.md，基于项目真实上下文回答
 ```
 
 ---
 
-## Slash 命令
+## Agent 能力地图
 
-| 命令 | 作用 |
-|------|------|
-| `/aies:start` | 初始化会话（读上下文 + 规范） |
-| `/aies:finish-work` | 完成清单 |
-| `/aies:new-feature` | 按 new-feature.md 模板执行 |
-| `/aies:fix-bug` | 按 fix-bug.md 模板执行 |
-| `/aies:review` | 按 code-review.md 模板执行 |
-| `/aies:commit` | 按 git-commit.md 模板执行 |
-
----
-
-## 多 Agent（可选）
-
-如启用 `.aies/config.yaml` 中 `multi_agent.enabled: true`：
-
-- `dispatch` —— 调度器
-- `plan` —— 方案设计
-- `implement` —— 实现
-- `check` —— 审查 + 自修复
-- `debug` —— 调试
-
-详见 `.claude/agents/` 下各 Agent 定义。
+| 能力 | 触发方式 | 命令 |
+|------|---------|------|
+| 初始化项目 | 检测到 `.aies/` 不存在，或用户说"初始化/setup" | `/aies:bootstrap` |
+| 接收意图创建任务 | 用户描述新需求 | `/aies:task` |
+| 开始/恢复会话 | 用户说"开始/继续" | `/aies:start` |
+| 完成收尾 | 实现完毕，或用户说"完成/收尾" | `/aies:finish` |
+| 查看状态 | 用户问"现在在做什么/进度" | 读 `.aies/tasks/` + journal |
+| 升级模板 | 用户说"更新脚手架" | `python3 bootstrap.py --upgrade` |
 
 ---
 
-## 禁止事项
+## 提议协议（核心）
 
-- ❌ 跳过 Phase 1 直接写代码
-- ❌ `git commit/push/merge` 未经用户确认
-- ❌ 编造项目中不存在的函数/类型（必须先读 `.ai/index.md`）
-- ❌ 大段重写用户未要求的代码
+**Agent 永远是提议者，人是拍板者。**
+
+Agent 不问"你想要什么"，而是说"我的理解是这样，你看对不对"：
+
+```
+❌ 错误模式（问卷式）：
+   "请问您需要什么功能？验收标准是什么？"
+
+✅ 正确模式（提议式）：
+   "我的理解：你要做X。
+    我提议的验收标准：[3条具体场景]
+    不确定的地方：[1-2个问题]
+    说'ok'开始，或直接告诉我哪里要改。"
+```
+
+---
+
+## 上下文体系
+
+Agent 读写文件的职责：
+
+```
+读：
+  .aies/spec/index.md      ← 规范总导航
+  .aies/spec/guides/       ← Thinking Guides（动手前检查）
+  .aies/workflow.md        ← 工作流协议
+  .ai/index.md             ← 项目地图（模块/接口/函数真实存在的）
+  .ai/review-checklist.md  ← Code Review 清单
+  .aies/tasks/{当前任务}/context.jsonl  ← 本任务需要的 spec
+
+写：
+  .aies/tasks/{slug}/prd.md          ← Agent 填写，人确认
+  .aies/tasks/{slug}/acceptance.md   ← Agent 填写，人确认
+  .aies/tasks/{slug}/context.jsonl   ← Agent 根据任务类型自动生成
+  .aies/workspace/{dev}/journal.md   ← 会话记忆，自动追加
+  .aies/spec/*.md                    ← Spec 回流时直接修改
+  .ai/index.md                       ← 完成任务后更新
+  .ai/changelog.md                   ← Spec 变更记录
+```
+
+---
+
+## 三条铁律
+
+1. **禁止编造**：任何函数、类型、接口，先读 `.ai/index.md` 确认真实存在
+2. **禁止沉默跳过**：Phase 3 Spec 回流三问，必须显式回答
+3. **禁止未确认提交**：`git commit/push` 需要用户明确说"提交"
+
+---
+
+## 规范位置
+
+```
+.aies/spec/         ← 所有编码规范（architecture/code-style/quality-gates/...）
+.aies/spec/guides/  ← Thinking Guides（code-reuse/cross-layer/auth-context）
+.ai/                ← 项目实例信息（index/review-checklist/glossary/...）
+```
+
+详见 `.aies/spec/index.md`。

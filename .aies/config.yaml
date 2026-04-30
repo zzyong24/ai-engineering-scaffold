@@ -54,6 +54,28 @@ platforms:
   - universal
 
 # ============================================================
+# Monorepo / 多包支持（可选）
+# ============================================================
+
+# 声明 monorepo 中的各个包，任务和 journal 可关联到具体包
+# path: 相对于项目根目录的路径
+# type: service / cli / lib / frontend / other
+# default: true 时 task.py create 不需要加 --package 参数
+# git: true 表示该包是独立 git 子模块（polyrepo 布局）
+packages: []
+# 示例（多服务 monorepo）：
+# packages:
+#   - path: agent-manage-backend
+#     type: service
+#     default: true
+#   - path: agent-server
+#     type: service
+#   - path: agent-knowledge-service
+#     type: service
+#   - path: o2-api-gateway
+#     type: service
+
+# ============================================================
 # 多 Agent 流水线（可选，默认关闭）
 # ============================================================
 
@@ -61,3 +83,4 @@ multi_agent:
   enabled: false
   # 启用时，会在 .claude/agents/ 下生成 plan/implement/check/debug 等子 Agent
   # 详见 docs/multi-agent-decision.md
+

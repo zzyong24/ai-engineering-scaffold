@@ -76,7 +76,8 @@
 
 - 每次生成代码前必须加载项目 Spec
 - 发现产出风格不一致 → 立即纠正 + 补充 Spec
-- 新约定必须沉淀到 Spec，不能只在对话中说一次
+- **新约定必须沉淀到 Spec（Spec 回流），不能只在对话中说一次**
+- 每次任务完成后强制三问（有没有应统一规范的地方？有没有踩坑？guides/ 需要新增吗？）
 
 ### 维度 4：索引自维护 — 保持项目地图可用
 
@@ -93,6 +94,13 @@
 ### 维度 6：上下文管理 — 精准喂上下文
 
 遵循「最小充分上下文」原则：**给够参考但不过载**。不要把整个项目丢给 AI。
+
+实践方式：
+- 任务目录的 `context.jsonl` 声明该任务需要加载哪些 spec（implement/check 分开）
+- Thinking Guides（`spec/guides/`）在动手前按场景选读，防止"没想到"类 bug
+  - 写新函数前 → `guides/code-reuse.md`（先搜）
+  - 跨层调用前 → `guides/cross-layer.md`（检查依赖方向）
+  - 涉及鉴权前 → `guides/auth-context.md`（检查透传链路）
 
 ### 维度 7：隐性技术债 — 审查 AI 代码的盲区
 
@@ -187,6 +195,14 @@ Model 层函数必须首参数 ctx context.Context，必须 DB.WithContext(ctx)
 # ✅ 可执行规则
 函数参数不超过 4 个，第一个必须是 ctx context.Context
 超过则封装为 struct 放 internal/entity/
+```
+
+### ❌ 反模式 7：Spec 回流沉默跳过
+
+```
+❌ 每次任务完成清单里"Spec 缺口"一栏留空或写"无"，但其实踩了新坑
+✅ 强制三问：有没有新约定？有没有踩坑？guides/ 需要新增吗？
+   有则立即修改 spec，changelog 记一行。下次同样的坑不会再踩。
 ```
 
 ---

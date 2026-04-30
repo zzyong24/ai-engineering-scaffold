@@ -29,6 +29,18 @@
 
 ---
 
+## Thinking Guides（动手前思维检查）
+
+> 不是规范，是**防踩坑的思维框架**。遇到对应场景时花 5 分钟读一遍。
+
+| Guide | 适用场景 |
+|-------|---------|
+| [guides/code-reuse.md](./guides/code-reuse.md) | 新增函数/工具函数前，先搜索是否已有类似实现 |
+| [guides/cross-layer.md](./guides/cross-layer.md) | 功能跨多个架构层时，检查依赖方向和数据边界 |
+| [guides/auth-context.md](./guides/auth-context.md) | 涉及用户身份/权限/MCP 调用时，检查鉴权透传 |
+
+---
+
 ## 开发前必读清单
 
 ```bash
@@ -73,12 +85,17 @@ cat .aies/spec/testing.md            # 测试规范（新增任务时必读）
    - [ ] 日志规范（关键操作有日志、无敏感字段）
    - [ ] 编译/类型检查通过
 2. 测试验收（参照 acceptance.md）：
-   - [ ] 单元测试全部通过（pytest tests/unit/ -v）
+   - [ ] 单元测试全部通过
    - [ ] E2E Happy Path 通过
    - [ ] acceptance.md 中所有 P0 验收场景打勾
 3. 索引更新：[已更新 .ai/index.md / 无需更新]
 4. 建议 commit message：`type(scope): 描述 [ai-assisted]`
-5. 是否有新约定需沉淀到 Spec：[有/无]
+5. ⭐ Spec 回流（强制，不可跳过）：
+   Q1: 本次有没有"应该统一规范"的地方？[有/无]
+   Q2: 有没有踩坑，下次需要提前规避？[有/无]
+   Q3: spec/guides/ 是否需要新增场景？[有/无]
+   → 有则直接修改 spec，并在 .ai/changelog.md 追加一行
+   → 无则写"Spec 回流：无新约定"，不能沉默跳过
 ```
 
 ---

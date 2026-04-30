@@ -31,17 +31,7 @@ cd /path/to/your-new-project
 python3 /path/to/ai-engineering-scaffold/bootstrap.py --developer your-name
 ```
 
-### 方式 2：手动拷贝
-
-```bash
-cp -r ai-engineering-scaffold/.ai        your-project/
-cp -r ai-engineering-scaffold/.aies      your-project/
-cp    ai-engineering-scaffold/AGENTS.md  your-project/
-cp    ai-engineering-scaffold/CLAUDE.md  your-project/
-cp    ai-engineering-scaffold/.cursorrules your-project/  # 可选
-```
-
-### 方式 3：交互式按需选择（推荐）
+### 方式 2：交互式按需选择（推荐）
 
 ```bash
 cd /path/to/your-new-project
@@ -52,7 +42,28 @@ python3 /path/to/ai-engineering-scaffold/bootstrap.py --interactive
 - 语言栈（Go / TypeScript / Python / Java / Rust / 其他）
 - AI 平台（Claude Code / Cursor / CodeBuddy / Copilot / 全部）
 - 启用多 Agent 流水线（是 / 否）
-- 启用 Git Hooks（是 / 否）
+
+### 方式 3：手动拷贝
+
+```bash
+cp -r ai-engineering-scaffold/.ai        your-project/
+cp -r ai-engineering-scaffold/.aies      your-project/
+cp    ai-engineering-scaffold/AGENTS.md  your-project/
+cp    ai-engineering-scaffold/CLAUDE.md  your-project/
+```
+
+### 方式 4：升级已有项目（检查模板更新）
+
+```bash
+# 查看 scaffold 模板相比上次初始化有哪些变化
+python3 /path/to/ai-engineering-scaffold/bootstrap.py --upgrade --target /path/to/your-project
+```
+
+升级模式会：
+- 对比 `.aies/.template-hashes.json` 与当前模板文件
+- 列出新增/修改/废弃的模板文件
+- 标注哪些文件被本地修改过（需要仔细合并）
+- 引导你手动合并变更
 
 ---
 
@@ -83,21 +94,29 @@ ai-engineering-scaffold/
 │       ├── git-commit.md
 │       └── refactor.md
 │
-├── .aies/                        ← ⚙️ 任务管理与会话记忆（类 Trellis）
-│   ├── workflow.md               ← 工作流说明（AI 必读）
-│   ├── config.yaml               ← 配置（日志上限/Hooks）
+├── .aies/                        ← ⚙️ 任务管理与会话记忆
+│   ├── workflow.md               ← 工作流说明（Phase 0-4 协议，AI 必读）
+│   ├── config.yaml               ← 配置（日志上限/Hooks/Monorepo packages）
 │   ├── spec/                     ← 分层规范（语言/架构约定）
-│   │   ├── index.md
+│   │   ├── index.md              ← 规范总导航（含任务启动/完成清单）
 │   │   ├── code-style.md
 │   │   ├── architecture.md
 │   │   ├── quality-gates.md
 │   │   ├── error-handling.md
-│   │   └── logging.md
-│   ├── tasks/                    ← 任务目录（每任务一子目录）
-│   │   └── .gitkeep
+│   │   ├── logging.md
+│   │   └── guides/               ← Thinking Guides（动手前思维检查）
+│   │       ├── index.md          ← 场景路由表
+│   │       ├── code-reuse.md     ← 写前先搜，避免重复造轮子
+│   │       ├── cross-layer.md    ← 跨层边界检查
+│   │       └── auth-context.md   ← 鉴权上下文透传检查（MCP/多租户）
+│   ├── tasks/                    ← 任务目录
+│   │   └── {MM-DD-slug}/
+│   │       ├── task.json         ← 元数据
+│   │       ├── prd.md            ← 需求描述
+│   │       ├── acceptance.md     ← 验收标准（implement 前必须完成）
+│   │       └── context.jsonl     ← 精准 spec 注入清单（implement/check agent 读取）
 │   ├── workspace/                ← 会话日志（每开发者一目录）
-│   │   └── .gitkeep
-│   └── scripts/                  ← 辅助脚本（Python，可选 Node 版）
+│   └── scripts/                  ← 辅助脚本
 │       ├── session.py            ← get-context / add-session
 │       ├── task.py               ← create / list / finish / archive
 │       ├── init-developer.py
@@ -106,14 +125,14 @@ ai-engineering-scaffold/
 │
 ├── platforms/                    ← 🔌 各 AI 平台适配文件模板
 │   ├── claude/
-│   │   ├── CLAUDE.md
-│   │   ├── commands/             ← /aies:start /aies:finish-work ...
+│   │   ├── CLAUDE.md             ← 4 条原则 + slash 命令入口（精简版，细节在 spec/）
+│   │   ├── commands/             ← /start /aies:start /aies:finish-work ...
 │   │   ├── agents/               ← plan/implement/check/debug 子 Agent
 │   │   ├── hooks/                ← session-start / inject-context
 │   │   └── settings.json
 │   ├── cursor/
 │   │   ├── rules/
-│   │   └── commands/
+│   │   └── commands/             ← start / aies-finish-work
 │   ├── codebuddy/
 │   │   └── rules/
 │   ├── copilot/

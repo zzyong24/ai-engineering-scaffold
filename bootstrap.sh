@@ -56,6 +56,13 @@ for f in "$SCAFFOLD_DIR"/.aies/spec/*.md; do
     [[ -f "$f" ]] || continue
     copy_safe "$f" "$TARGET/.aies/spec/$(basename "$f")"
 done
+# Thinking Guides
+if [[ -d "$SCAFFOLD_DIR/.aies/spec/guides" ]]; then
+    for f in "$SCAFFOLD_DIR"/.aies/spec/guides/*.md; do
+        [[ -f "$f" ]] || continue
+        copy_safe "$f" "$TARGET/.aies/spec/guides/$(basename "$f")"
+    done
+fi
 mkdir -p "$TARGET/.aies/tasks" "$TARGET/.aies/workspace"
 touch "$TARGET/.aies/tasks/.gitkeep" "$TARGET/.aies/workspace/.gitkeep"
 
@@ -70,8 +77,9 @@ if [[ ! -f "$TARGET/.gitignore" ]] || ! grep -q "\.aies/\.developer" "$TARGET/.g
         echo ""
         echo "# AIES"
         echo ".aies/.developer"
+        echo ".aies/.template-hashes.json"
     } >> "$TARGET/.gitignore"
-    echo "  已追加 .aies/.developer 到 .gitignore"
+    echo "  已追加 AIES 条目到 .gitignore"
 else
     echo "  .gitignore 已包含必要条目"
 fi
