@@ -83,20 +83,19 @@ ai-engineering-scaffold/
 │   ├── case-study-agent-crontask.md    ← 战例：1 次会话从零实现 MCP Server
 │   └── global-hooks-design.md         ← 全局 Hook 设计指南（个人工具 vs 工程工具）
 │
-├── .ai/                          ← 📋 AI 协作工作区（项目级、可提交）
-│   ├── index.md                  ← 项目地图（架构/路由/模型/调用链）
-│   ├── context-guide.md          ← 场景 → 需要提供的上下文文件
-│   ├── review-checklist.md       ← AI 代码审查清单（8 维度）
-│   ├── changelog.md              ← 变更日志（AI 自动追加）
-│   ├── glossary.md               ← 业务术语表（统一 AI 和团队语义）
-│   └── prompts/                  ← Prompt 模板库（按场景）
-│       ├── new-feature.md
-│       ├── fix-bug.md
-│       ├── code-review.md
-│       ├── git-commit.md
-│       └── refactor.md
-│
 ├── .aies/                        ← ⚙️ 任务管理与会话记忆
+│   ├── .ai/                      ← 📋 AI 协作工作区（项目级、可提交）
+│   │   ├── index.md              ← 项目地图（架构/路由/模型/调用链）
+│   │   ├── context-guide.md      ← 场景 → 需要提供的上下文文件
+│   │   ├── review-checklist.md   ← AI 代码审查清单（8 维度）
+│   │   ├── changelog.md          ← 变更日志（AI 自动追加）
+│   │   ├── glossary.md           ← 业务术语表（统一 AI 和团队语义）
+│   │   └── prompts/              ← Prompt 模板库（按场景）
+│   │       ├── new-feature.md
+│   │       ├── fix-bug.md
+│   │       ├── code-review.md
+│   │       ├── git-commit.md
+│   │       └── refactor.md
 │   ├── workflow.md               ← 工作流说明（Phase 0-4 协议，AI 必读）
 │   ├── config.yaml               ← 配置（日志上限/Hooks/Monorepo packages）
 │   ├── spec/                     ← 分层规范（语言/架构约定）
@@ -118,31 +117,30 @@ ai-engineering-scaffold/
 │   │       ├── acceptance.md     ← 验收标准（implement 前必须完成）
 │   │       └── context.jsonl     ← 精准 spec 注入清单（implement/check agent 读取）
 │   ├── workspace/                ← 会话日志（每开发者一目录）
+│   ├── platforms/                ← 🔌 各 AI 平台适配文件模板
+│   │   ├── claude/
+│   │   │   ├── CLAUDE.md         ← 4 条原则 + slash 命令入口（精简版，细节在 spec/）
+│   │   │   ├── commands/         ← /start /aies:start /aies:finish-work ...
+│   │   │   ├── agents/           ← plan/implement/check/debug 子 Agent
+│   │   │   ├── hooks/            ← session-start / inject-context
+│   │   │   └── settings.json
+│   │   ├── cursor/
+│   │   │   ├── rules/
+│   │   │   └── commands/         ← start / aies-finish-work
+│   │   ├── codebuddy/
+│   │   │   └── rules/
+│   │   ├── copilot/
+│   │   │   └── instructions/
+│   │   ├── codex/
+│   │   │   └── AGENTS.md
+│   │   └── common/
+│   │       └── AGENTS.md         ← 通用 Agent 入口
 │   └── scripts/                  ← 辅助脚本
 │       ├── session.py            ← get-context / add-session
 │       ├── task.py               ← create / list / finish / archive
 │       ├── init-developer.py
 │       └── lib/
 │           └── common.py
-│
-├── platforms/                    ← 🔌 各 AI 平台适配文件模板
-│   ├── claude/
-│   │   ├── CLAUDE.md             ← 4 条原则 + slash 命令入口（精简版，细节在 spec/）
-│   │   ├── commands/             ← /start /aies:start /aies:finish-work ...
-│   │   ├── agents/               ← plan/implement/check/debug 子 Agent
-│   │   ├── hooks/                ← session-start / inject-context
-│   │   └── settings.json
-│   ├── cursor/
-│   │   ├── rules/
-│   │   └── commands/             ← start / aies-finish-work
-│   ├── codebuddy/
-│   │   └── rules/
-│   ├── copilot/
-│   │   └── instructions/
-│   ├── codex/
-│   │   └── AGENTS.md
-│   └── common/
-│       └── AGENTS.md             ← 通用 Agent 入口
 │
 ├── ci/                           ← 🛡️ CI 质量门（可选接入）
 │   ├── github-actions/
