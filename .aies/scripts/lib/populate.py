@@ -479,7 +479,7 @@ def generate_index_md(project_name: str, language: str, framework: str | None, s
 
 ## 五、变更日志
 
-> 变更日志独立在 `.ai/changelog.md`，避免每次加载 index 都带上历史 diff（省 token）。
+> 变更日志独立在 `.aies/.ai/changelog.md`，避免每次加载 index 都带上历史 diff（省 token）。
 """
 
 

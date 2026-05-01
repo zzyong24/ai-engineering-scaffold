@@ -9,7 +9,7 @@
 ```
 人描述意图
     ↓
-Agent 解析（读 .ai/index.md 确认上下文）
+Agent 解析（读 .aies/.ai/index.md 确认上下文）
     ↓
 Agent 驱动任务创建 + 填 prd + 填 acceptance
     ↓
@@ -62,7 +62,7 @@ Agent 执行：
 Agent 执行：
 1. 读 `context.jsonl` → 加载指定 spec（不全量读）
 2. 检查 `spec/guides/` 中相关的 Thinking Guide
-3. 读 `.ai/index.md` → 确认函数/类型真实存在（禁止编造）
+3. 读 `.aies/.ai/index.md` → 确认函数/类型真实存在（禁止编造）
 4. 按 spec 约束实现代码
 5. 关键决策处写 "为什么" 注释
 6. 自检：build / lint / test
@@ -72,7 +72,7 @@ Agent 执行：
 Agent 自动执行（无需人触发）：
 1. 对照 `acceptance.md` P0 场景逐条确认
 2. 对照 `review-checklist.md` 9 大维度自检
-3. 更新 `.ai/index.md`（如有新增文件/接口）
+3. 更新 `.aies/.ai/index.md`（如有新增文件/接口）
 
 Spec 回流（**必须展示给人确认**）：
 ```
@@ -100,8 +100,8 @@ Agent 自动执行收尾：
 | `.aies/tasks/{slug}/acceptance.md` | **Agent 填，人确认** | Agent | 验收标准 |
 | `.aies/tasks/{slug}/context.jsonl` | Agent 自动生成 | Agent | 精准 spec 注入 |
 | `.aies/workspace/{dev}/journal.md` | Agent 自动追加 | Agent（接续会话）| 跨会话记忆 |
-| `.ai/index.md` | Agent（完成任务后更新）| Agent（禁止编造）| 项目地图 |
-| `.ai/changelog.md` | Agent（Spec 回流时）| Agent | Spec 变更记录 |
+| `.aies/.ai/index.md` | Agent（完成任务后更新）| Agent（禁止编造）| 项目地图 |
+| `.aies/.ai/changelog.md` | Agent（Spec 回流时）| Agent | Spec 变更记录 |
 
 ---
 
@@ -113,7 +113,7 @@ Agent 自动执行收尾：
 - 读取和写入 spec 文件（回流确认后）
 - 追加会话日志
 - 归档完成的任务
-- 更新 .ai/index.md
+- 更新 .aies/.ai/index.md
 
 **必须暂停等待人确认**：
 - 展示 prd + acceptance 提议后
@@ -121,7 +121,7 @@ Agent 自动执行收尾：
 - `git commit` / `git push` 前
 
 **禁止**：
-- ❌ 编造 .ai/index.md 中不存在的函数/类型
+- ❌ 编造 .aies/.ai/index.md 中不存在的函数/类型
 - ❌ Spec 回流沉默跳过
 - ❌ acceptance.md 留 TODO（必须基于意图填写真实场景）
 - ❌ 未经人确认执行 git 操作
@@ -137,7 +137,7 @@ Agent 自动执行收尾：
 | "做完了" / "收尾" / "提交" | `/aies:finish` |
 | "初始化" / "setup" / 检测到 .aies 不存在 | `/aies:bootstrap` |
 | "进度" / "在做什么" | `task.py list --human` + journal 摘要 |
-| 技术问题 / 方案讨论 | 读 .ai/index.md，基于项目上下文回答 |
+| 技术问题 / 方案讨论 | 读 .aies/.ai/index.md，基于项目上下文回答 |
 | 定时触发 / `/loop` 触发 | `/aies:autopilot` |
 
 ---

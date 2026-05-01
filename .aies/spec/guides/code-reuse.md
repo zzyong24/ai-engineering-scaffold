@@ -18,7 +18,7 @@
   ```
 - [ ] **检查 utils/helper 目录**：项目是否有专属工具包？（如 `pkg/util/`、`internal/utils/`、`src/utils/`）
 - [ ] **检查相邻服务**：同 monorepo 内其他服务是否有类似实现，可以复用？
-- [ ] **检查 AI 常见误区**：AI 生成代码时容易生成项目中不存在的函数名，**写前先读 `.ai/index.md` 确认函数/类型是否真实存在**
+- [ ] **检查 AI 常见误区**：AI 生成代码时容易生成项目中不存在的函数名，**写前先读 `.aies/.ai/index.md` 确认函数/类型是否真实存在**
 
 ---
 
@@ -60,4 +60,4 @@ func listAgents(c *gin.Context) {
 
 **如果没找到**：
 1. 新建时放在合适的 utils/pkg 目录，不要塞进 handler/service
-2. 写完后更新 `.ai/index.md` 中的工具函数列表
+2. 写完后更新 `.aies/.ai/index.md` 中的工具函数列表

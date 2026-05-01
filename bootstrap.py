@@ -45,48 +45,48 @@ from lib.populate import has_meaningful_code, populate_specs, interactive_setup 
 # 模板常量
 # ============================================================
 
-CORE_DIRS = [".ai", ".aies"]
+CORE_DIRS = [".aies"]
 
 PLATFORM_MAP = {
     "claude": {
-        "source": "platforms/claude",
+        "source": ".aies/platforms/claude",
         "targets": [
-            ("CLAUDE.md", "CLAUDE.md"),
-            ("settings.json", ".claude/settings.json"),
-            ("hooks/", ".claude/hooks/"),
-            ("commands/", ".claude/commands/"),
-            ("agents/", ".claude/agents/"),
+            ("CLAUDE.md", ".aies/CLAUDE.md"),
+            ("settings.json", ".aies/claude/settings.json"),
+            ("hooks/", ".aies/claude/hooks/"),
+            ("commands/", ".aies/claude/commands/"),
+            ("agents/", ".aies/claude/agents/"),
         ],
     },
     "cursor": {
-        "source": "platforms/cursor",
+        "source": ".aies/platforms/cursor",
         "targets": [
-            ("rules/", ".cursor/rules/"),
-            ("commands/", ".cursor/commands/"),
+            ("rules/", ".aies/cursor/rules/"),
+            ("commands/", ".aies/cursor/commands/"),
         ],
     },
     "codebuddy": {
-        "source": "platforms/codebuddy",
+        "source": ".aies/platforms/codebuddy",
         "targets": [
-            ("rules/", ".codebuddy/rules/"),
+            ("rules/", ".aies/codebuddy/rules/"),
         ],
     },
     "copilot": {
-        "source": "platforms/copilot",
+        "source": ".aies/platforms/copilot",
         "targets": [
-            ("instructions/copilot-instructions.md", ".github/copilot-instructions.md"),
+            ("instructions/copilot-instructions.md", ".aies/copilot-instructions.md"),
         ],
     },
     "codex": {
-        "source": "platforms/codex",
+        "source": ".aies/platforms/codex",
         "targets": [
-            ("AGENTS.md", "AGENTS.md"),
+            ("AGENTS.md", ".aies/AGENTS.md"),
         ],
     },
     "universal": {
-        "source": "platforms/common",
+        "source": ".aies/platforms/common",
         "targets": [
-            ("AGENTS.md", "AGENTS.md"),
+            ("AGENTS.md", ".aies/AGENTS.md"),
         ],
     },
 }
@@ -163,6 +163,7 @@ def write_gitignore_lines(target: Path, dry_run: bool) -> str:
     required = [
         ".aies/.developer",
         ".aies/.template-hashes.json",
+        ".aies/platforms/**/settings.json",
     ]
 
     existing = gi_path.read_text(encoding="utf-8") if gi_path.is_file() else ""
@@ -194,7 +195,7 @@ def _file_md5(path: Path) -> str:
 def _collect_template_hashes() -> dict[str, str]:
     """收集 scaffold 所有模板文件的哈希"""
     hashes: dict[str, str] = {}
-    for src_dir in [SCAFFOLD_DIR / ".ai", SCAFFOLD_DIR / ".aies"]:
+    for src_dir in [SCAFFOLD_DIR / ".aies"]:
         if not src_dir.is_dir():
             continue
         for f in src_dir.rglob("*"):
@@ -314,7 +315,7 @@ def post_process_placeholders(target: Path, project_name: str, dry_run: bool) ->
         "{{INIT_DATE}}": datetime.now().strftime("%Y-%m-%d"),
     }
 
-    patterns = [".ai/*.md", ".aies/**/*.md", "CLAUDE.md", "AGENTS.md"]
+    patterns = [".aies/**/*.md", ".aies/CLAUDE.md", ".aies/AGENTS.md"]
 
     for pat in patterns:
         for f in target.glob(pat):
@@ -532,10 +533,10 @@ def main() -> int:
     else:
         print("✅ AIES 初始化完成！")
         print()
-        print("已自动填充规范文件：.aies/spec/architecture.md, .aies/spec/code-style.md, .ai/index.md")
+        print("已自动填充规范文件：.aies/spec/architecture.md, .aies/spec/code-style.md, .aies/.ai/index.md")
         print()
         print("建议操作：")
-        print("  1. 读 .ai/index.md 确认项目地图是否准确")
+        print("  1. 读 .aies/.ai/index.md 确认项目地图是否准确")
         print("  2. 读 .aies/spec/architecture.md 确认架构描述是否符合预期")
         print("  3. 如需调整，编辑对应文件（AIES 已根据项目代码自动生成了基础内容）")
         print()

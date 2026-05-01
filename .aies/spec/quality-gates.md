@@ -26,14 +26,14 @@
 ### 文档
 
 - [ ] 新增/修改的 API 有文档（Swagger / JSDoc / docstring）
-- [ ] `.ai/index.md` 已更新（如涉及路由/模型/文件变更）
+- [ ] `.aies/.ai/index.md` 已更新（如涉及路由/模型/文件变更）
 - [ ] 复杂决策有注释说明
 
 ---
 
 ## 质量自检清单
 
-参照 `.ai/review-checklist.md` 逐项检查。
+参照 `.aies/.ai/review-checklist.md` 逐项检查。
 
 ---
 
@@ -43,7 +43,7 @@
 - ❌ 跳过 Hooks 提交（`--no-verify`）
 - ❌ 包含 `TODO: fixme before merge` 等临时标记
 - ❌ commit message 不符合规范
-- ❌ `.ai/index.md` 与实际代码不一致
+- ❌ `.aies/.ai/index.md` 与实际代码不一致
 - ❌ AI 生成代码但未标注 `[ai-assisted]`
 
 ---
@@ -55,7 +55,7 @@
 允许跳过部分质量门，但必须：
 - [ ] commit message 注明 `[hotfix]`
 - [ ] 次日补齐文档和测试
-- [ ] 在 `.ai/changelog.md` 标红记录
+- [ ] 在 `.aies/.ai/changelog.md` 标红记录
 
 ### 重构（refactor）
 

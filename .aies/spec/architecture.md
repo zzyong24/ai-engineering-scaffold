@@ -1,29 +1,16 @@
 # 架构规范
 
 > 本文件定义项目的架构约束。**所有代码生成必须遵守**。
+> 自动生成于 2026-05-01
 
 ---
 
 ## 分层架构
 
-> 根据项目技术栈调整。以下为常见分层模式，请按实际填写。
-
-### 通用分层模板
+### Python + fastapi 项目结构
 
 ```
-┌──────────────────────────────────────┐
-│  入口层（Router / Controller）         │
-│  职责：路由、参数绑定、响应封装          │
-│  禁止：写业务逻辑、直接访问数据库          │
-├──────────────────────────────────────┤
-│  业务层（Service / UseCase）           │
-│  职责：业务逻辑、数据编排、事务控制        │
-│  禁止：直接操作 HTTP 上下文              │
-├──────────────────────────────────────┤
-│  数据层（Model / Repository / DAO）     │
-│  职责：纯数据访问、CRUD                 │
-│  禁止：业务逻辑、逆向依赖业务层            │
-└──────────────────────────────────────┘
+│  （未检测到分层结构）
 ```
 
 ### 依赖方向
@@ -40,40 +27,38 @@
 ## 目录结构
 
 ```
-TODO: 填写项目实际目录结构
+├── ci/
+├── docs/
+├── examples/
+├── platforms/
 ```
 
 ### 文件命名约定
 
-TODO: 按项目语言/框架填写，例如：
-- Go: `{entity}_{layer}.go`（如 `agent_api.go`、`agent_service.go`）
-- TypeScript: `{entity}.{layer}.ts`（如 `agent.controller.ts`）
-- Python: `{layer}_{entity}.py`（如 `service_agent.py`）
-
-### 结构体/类命名约定
-
-TODO: 按项目语言/框架填写，例如：
-- `AgentAPI` / `AgentController` —— 入口层
-- `AgentService` —— 业务层
-- `AgentModel` / `AgentRepository` —— 数据层
+Python 风格：
+- 文件：`{layer}_{entity}.py`（如 `service_agent.py`、`repository_user.py`）
+- 类：`AgentService`、`UserRepository`（大写驼峰）
 
 ---
 
 ## 依赖注入规范
 
-TODO: 填写项目的 DI 方式
-- 构造函数注入 / 属性注入 / 框架 DI 容器
+**Python 典型 DI 方式**：构造函数注入。
 
 示例：
 
-```
-// 通过构造函数注入
-type AgentAPI struct {
-    agentService *service.AgentService
-}
+```python
+class AgentService:
+    def __init__(
+        self,
+        agent_repo: AgentRepository,
+        logger: Logger,
+    ) -> None:
+        self._agent_repo = agent_repo
+        self._logger = logger
 
-// 调用方式
-result, err := a.agentService.CreateAgent(ctx, req)
+    async def create_agent(self, req: CreateAgentDto) -> Agent:
+        return await self._agent_repo.create(req)
 ```
 
 ---
@@ -114,8 +99,5 @@ result, err := a.agentService.CreateAgent(ctx, req)
 
 ## 项目特定规范
 
-> 各项目在此补充特有的架构约束，如：
-> - 是否使用事件驱动
-> - 是否有多租户设计
-> - 是否有 CQRS / Event Sourcing
-> - 跨模块调用方式
+> 本项目使用 Python + fastapi。
+> 更多规范参见 `code-style.md`。
