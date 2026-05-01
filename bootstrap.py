@@ -37,6 +37,10 @@ from pathlib import Path
 SCAFFOLD_DIR = Path(__file__).parent.resolve()
 TEMPLATE_HASHES_FILE = ".aies/.template-hashes.json"
 
+# Add scripts/lib to path for populate module
+sys.path.insert(0, str(Path(__file__).parent / ".aies" / "scripts"))
+from lib.populate import has_meaningful_code, populate_specs, interactive_setup  # noqa: E402, E501
+
 # ============================================================
 # 模板常量
 # ============================================================
@@ -465,6 +469,14 @@ def main() -> int:
 
     all_actions: list[str] = []
 
+    # Step 0: 检测项目类型（在拷贝模板之前）
+    all_actions.append("\n🔍 检测项目类型")
+    project_has_code = has_meaningful_code(target)
+    if project_has_code:
+        all_actions.append("  检测到已有代码，将进入自动分析模式")
+    else:
+        all_actions.append("  检测到空工程，将进入引导式配置模式")
+
     # Step 1: 核心目录
     all_actions.extend(install_core(target, mode, dry_run))
 
@@ -484,7 +496,16 @@ def main() -> int:
     all_actions.append("\n🔒 记录模板哈希（用于 --upgrade）")
     all_actions.append(write_template_hashes(target, dry_run))
 
-    # Step 6: 初始化开发者身份
+    # Step 6: 智能填充（根据项目类型走不同分支）
+    all_actions.append("\n🧠 智能填充规范文件")
+    if project_has_code:
+        all_actions.append("  自动分析已有代码，填充规范文件")
+        all_actions.extend(populate_specs(target, cfg["project_name"]))
+    else:
+        all_actions.append("  引导式配置空工程规范")
+        all_actions.extend(interactive_setup(target, cfg["project_name"]))
+
+    # Step 7: 初始化开发者身份
     if cfg["developer"] and not dry_run:
         import subprocess
         script = target / ".aies" / "scripts" / "init-developer.py"
@@ -511,12 +532,12 @@ def main() -> int:
     else:
         print("✅ AIES 初始化完成！")
         print()
-        print("下一步：")
-        print("  1. 读 docs/philosophy.md 了解方法论")
-        print("  2. 读 .aies/workflow.md 了解工作流")
-        print("  3. 编辑 .ai/index.md 填写项目地图")
-        print("  4. 编辑 .aies/spec/architecture.md 填写架构约束")
-        print("  5. 运行 python3 .aies/scripts/session.py get-context 测试")
+        print("已自动填充规范文件：.aies/spec/architecture.md, .aies/spec/code-style.md, .ai/index.md")
+        print()
+        print("建议操作：")
+        print("  1. 读 .ai/index.md 确认项目地图是否准确")
+        print("  2. 读 .aies/spec/architecture.md 确认架构描述是否符合预期")
+        print("  3. 如需调整，编辑对应文件（AIES 已根据项目代码自动生成了基础内容）")
         print()
         print("升级模板时：")
         print("  python3 bootstrap.py --upgrade --target <项目目录>")
