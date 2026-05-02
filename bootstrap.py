@@ -51,7 +51,7 @@ PLATFORM_MAP = {
     "claude": {
         "source": ".aies/platforms/claude",
         "targets": [
-            ("CLAUDE.md", ".aies/CLAUDE.md"),
+            ("CLAUDE.md", "CLAUDE.md"),  # 根目录，Claude Code 标准加载路径
             ("settings.json", ".aies/claude/settings.json"),
             ("hooks/", ".aies/claude/hooks/"),
             ("commands/", ".aies/claude/commands/"),
@@ -315,7 +315,7 @@ def post_process_placeholders(target: Path, project_name: str, dry_run: bool) ->
         "{{INIT_DATE}}": datetime.now().strftime("%Y-%m-%d"),
     }
 
-    patterns = [".aies/**/*.md", ".aies/CLAUDE.md", ".aies/AGENTS.md"]
+    patterns = [".aies/**/*.md", "CLAUDE.md", ".aies/AGENTS.md"]
 
     for pat in patterns:
         for f in target.glob(pat):
