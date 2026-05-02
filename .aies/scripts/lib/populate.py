@@ -516,7 +516,7 @@ def populate_specs(target: Path, project_name: str) -> list[str]:
             actions.append(f"  FILL  {style_path.relative_to(target)}")
 
     # 填充 index.md
-    index_path = target / ".ai" / "index.md"
+    index_path = target / ".aies" / ".ai" / "index.md"
     if index_path.exists():
         content = index_path.read_text(encoding="utf-8")
         if "{{PROJECT_NAME}}" in content or "TODO" in content:
@@ -587,7 +587,7 @@ def interactive_setup(target: Path, project_name: str) -> list[str]:
     for path, content_fn in [
         (target / ".aies" / "spec" / "architecture.md", lambda: generate_architecture_md(language, framework, layers, list(layers.keys()))),
         (target / ".aies" / "spec" / "code-style.md", lambda: generate_code_style_md(language)),
-        (target / ".ai" / "index.md", lambda: generate_index_md(project_name, language, framework, structure, layers)),
+        (target / ".aies" / ".ai" / "index.md", lambda: generate_index_md(project_name, language, framework, structure, layers)),
     ]:
         if path.exists():
             path.write_text(content_fn(), encoding="utf-8")
