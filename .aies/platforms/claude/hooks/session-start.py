@@ -140,6 +140,24 @@ def main() -> int:
 - 收尾 → /aies:finish（Phase3 + spec回流 + 日志）
 - 禁止编造项目中不存在的函数/类型
 - 禁止未经确认执行 git commit
+
+<spec-compliance>
+每次任务开始前，基于任务类型声明将引用的 spec：
+
+示例：
+本次 [修复bug] 任务涉及规范：
+- .aies/spec/code-style.md（代码风格）
+- .aies/spec/architecture.md（架构约束）
+
+在实现前，你必须：
+1. 读取上述 spec 文件
+2. 声明"已阅读 spec：XXX"
+3. 按规范实现，完成后自检
+
+如任务涉及错误处理/日志，还需阅读：
+- .aies/spec/error-handling.md
+- .aies/spec/logging.md
+</spec-compliance>
 </ready>""")
 
     result = {

@@ -232,6 +232,23 @@ def write_template_hashes(target: Path, dry_run: bool) -> str:
     return f"  WRITE  {TEMPLATE_HASHES_FILE}  ({len(hashes)} 个模板文件)"
 
 
+def validate_installation(target: Path, required_files: list[str]) -> list[str]:
+    """校验关键文件是否正确安装"""
+    actions = []
+    errors = []
+    for f in required_files:
+        path = target / f
+        if path.exists():
+            actions.append(f"  ✓ {f}")
+        else:
+            actions.append(f"  ✗ {f} — 缺失!")
+            errors.append(f)
+    if errors:
+        actions.append(f"\n  ⚠️  {len(errors)} 个关键文件缺失，可能影响 AIES 正常运行")
+        actions.append(f"  缺失文件: {', '.join(errors)}")
+    return actions
+
+
 def cmd_upgrade(target: Path, dry_run: bool) -> int:
     """升级模式：diff 出模板变化，引导合并"""
     hashes_path = target / TEMPLATE_HASHES_FILE
@@ -520,6 +537,18 @@ def main() -> int:
                 )
             except Exception as e:
                 all_actions.append(f"  (失败：{e})")
+
+    # Step 8: 初始化后校验
+    if not dry_run:
+        all_actions.append("\n🔍 初始化后校验")
+        required_files = [
+            "CLAUDE.md",
+            ".aies/.ai/index.md",
+            ".aies/spec/index.md",
+            ".aies/workflow.md",
+            ".aies/config.yaml",
+        ]
+        all_actions.extend(validate_installation(target, required_files))
 
     # 输出
     print()
